@@ -54,10 +54,7 @@ function draw(){
 
 
 
-
-
-
-class Grass {
+class Item{
     constructor(x,y){
         this.x = x;
         this.y = y;
@@ -72,6 +69,10 @@ class Grass {
             [this.x + 1, this.y + 1]  
         ];
     }
+}
+
+
+class Grass extends Item {
     chooseCells(){
         var found = [];
         for (var i in this.directions) {
@@ -86,12 +87,13 @@ class Grass {
         var target = random(found);
         return target;
     }
-}
+} 
 
-class GrassEater {
+    
+
+class GrassEater  extends Item{
     constructor(x,y,energy){
-        this.x = x;
-        this.y = y;
+       super(x,y)
         this.energy = energy;
         this.directions = [
             [this.x - 1, this.y - 1],
@@ -163,8 +165,57 @@ class GrassEater {
 }
 
 class Empty {
-    constructor(x,y){
-        this.x = x;
-        this.y = y;
-    }
+    
 }
+
+// var  data = {
+//     "first_name ": "Fabio",
+//     "last_name": "Stafasani",
+//     "age": 15,
+//     "tumo_students": true,
+//      "favouriteAnimals" : [
+//         {
+//             "type": "cat",
+//             "color": "black"
+//         },
+//         {
+//             "type": "dog",
+//             "color": "red"
+//         }
+//      ],
+//      sayHello(){
+//         console.log("Hello")
+//      }
+// }
+ 
+
+
+
+//  class User{
+//     constructor(name,lastname, age, photo){
+//         this.name=name;
+//         this.lastname=lastname;
+//         this.age=age;
+//         this.photo=photo;
+//     }
+//    userInfo(){
+//     console.log(data.first_name)
+//     console.log(data.last_name)
+//     console.log(data.age)
+//     console.log(data.tumo_student)
+//     console.log(data.favouriteAnimals)
+   
+//    }
+//  }
+//  var bit = new User("Fabio", "Stafasani", 15, true, "dog");
+//  console.log(bit)
+
+//  var le = new User("Teo", "Dumi", 16, false, "cat")
+// console.log(le)
+
+//  var arr = [bit, le];
+// class Admin extends User{
+//     deleteUser(user,arr){
+
+//     }
+// }
