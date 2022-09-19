@@ -8,3 +8,7 @@ class Company{
         return this.offer
     }
 }
+
+
+
+
