@@ -3,7 +3,7 @@ var side = 15;
 var size2 = 50; // Reduced size due to lag
 var emptyCells = [];
 var timer = 0;
-
+var weather = ["spring", "summer", "fall", "Winter"];
 function setup(){
     createCanvas(size2*side,size2*side)
     background(50)
@@ -17,6 +17,8 @@ function setup(){
                 arr.push(new Grass(j,i))
             } else if(entity < 0.01){
                 arr.push(new GrassEater(j,i,15))
+            } else if(entity < 0.01){
+                arr.push(new Flower(j,i,15))
             }
         }
         matrix.push(arr)
@@ -24,7 +26,7 @@ function setup(){
 }
 
 function draw(){
-    frameRate(10)
+    frameRate(5)
     emptyCells=[];
     timer++
     for(var i=0;i<size2;i++){
@@ -39,10 +41,15 @@ function draw(){
                 fill('yellow')
                 matrix[j][i].move()
             }
+        else if(matrix[j][i] instanceof Flower){
+            fill('red')
+            matrix[j][i].move()
+        }
+  
             rect(j*side,i*side,side,side)
         }
     }
-    if (timer == 3){
+    if (timer == 2){
         for(var i in emptyCells){
             var x3 = emptyCells[i][0]
             var y3 = emptyCells[i][1]
@@ -168,54 +175,8 @@ class Empty {
     
 }
 
-// var  data = {
-//     "first_name ": "Fabio",
-//     "last_name": "Stafasani",
-//     "age": 15,
-//     "tumo_students": true,
-//      "favouriteAnimals" : [
-//         {
-//             "type": "cat",
-//             "color": "black"
-//         },
-//         {
-//             "type": "dog",
-//             "color": "red"
-//         }
-//      ],
-//      sayHello(){
-//         console.log("Hello")
-//      }
-// }
- 
+class Flower extends Item{
+    
+    }
 
-
-
-//  class User{
-//     constructor(name,lastname, age, photo){
-//         this.name=name;
-//         this.lastname=lastname;
-//         this.age=age;
-//         this.photo=photo;
-//     }
-//    userInfo(){
-//     console.log(data.first_name)
-//     console.log(data.last_name)
-//     console.log(data.age)
-//     console.log(data.tumo_student)
-//     console.log(data.favouriteAnimals)
-   
-//    }
-//  }
-//  var bit = new User("Fabio", "Stafasani", 15, true, "dog");
-//  console.log(bit)
-
-//  var le = new User("Teo", "Dumi", 16, false, "cat")
-// console.log(le)
-
-//  var arr = [bit, le];
-// class Admin extends User{
-//     deleteUser(user,arr){
-
-//     }
-// }
+    document.getElementById('timer').innerText="timer: " +timer
