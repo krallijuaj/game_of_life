@@ -4,6 +4,10 @@ var size2 = 50; // Reduced size due to lag
 var emptyCells = [];
 var timer = 0;
 var weather = ["spring", "summer", "fall", "Winter"];
+var emptyItems;
+var grassItems;
+var grassEaterItems;
+
 function setup(){
     createCanvas(size2*side,size2*side)
     background(50)
@@ -15,10 +19,12 @@ function setup(){
                 arr.push(new Empty(j,i))
             } else if(entity < 0.4 && entity > 0.01){
                 arr.push(new Grass(j,i))
-            } else if(entity < 0.01){
+            } else if(entity < 0.02){
                 arr.push(new GrassEater(j,i,15))
-            } else if(entity < 0.01){
-                arr.push(new Flower(j,i,15))
+            } 
+             if(entity < 0.01){
+                console.log('pushing ')
+                arr.push(new Flower(j,i))
             }
         }
         matrix.push(arr)
@@ -26,6 +32,55 @@ function setup(){
 }
 
 function draw(){
+    emptyItems = 0;
+    grassItems = 0;
+    grassEaterItems = 0;
+    flowerItems = 0
+    for (var i in matrix) {
+        for(var j in matrix[i]){
+            if(matrix[i][j] instanceof Empty){
+                emptyItems++
+            }
+            if(matrix[i][j] instanceof Grass){
+                grassItems++
+            }
+            if(matrix[i][j] instanceof GrassEater){
+                grassEaterItems++
+            }
+            if(matrix[i][j] instanceof Flower){
+               
+                grassItems++
+            }
+        }
+    }
+    if(timer== 10){
+    
+        weather="spring"
+        console.log(weather)
+        }
+        if(timer== 20){
+    
+            weather="winter"
+            console.log(weather)
+            }
+            if(timer== 30){
+    
+                weather="summer"
+                console.log(weather)
+                }
+                if(timer== 40){
+    
+                    weather="fall"
+                    console.log(weather)
+                    }
+                    
+                    if(weather="spring"){
+                        fill("red")
+                        }
+    document.getElementById('empty').innerText = "Empty Cells: " + emptyItems
+    document.getElementById('grass').innerText = "Grass Cells: " + grassItems
+    document.getElementById('grassEater').innerText = "GrassEater Cells: " + grassEaterItems
+    
     frameRate(5)
     emptyCells=[];
     timer++
@@ -49,15 +104,22 @@ function draw(){
             rect(j*side,i*side,side,side)
         }
     }
-    if (timer == 2){
+    if (timer % 3 == 0){
         for(var i in emptyCells){
             var x3 = emptyCells[i][0]
             var y3 = emptyCells[i][1]
             matrix[y3][x3]=new Grass(x3,y3);
         }
-        timer = 0;
-    }
+    }    
+    
+    document.getElementById('empty').innerText = "Empty Cells: " + emptyItems
+    document.getElementById('grass').innerText = "Grass Cells: " + grassItems
+    document.getElementById('grassEater').innerText = "GrassEater Cells: " + grassEaterItems
+    
+    document.getElementById('timer').innerText = "Timer: "+ timer
+    
 }
+
 
 
 
@@ -172,11 +234,65 @@ class GrassEater  extends Item{
 }
 
 class Empty {
-    
+    constructor(x,y){
+        this.x = x
+        this.y = y
+    }
 }
 
-class Flower extends Item{
-    
+class Flower{
+    constructor(x,y){
+        this.x = x
+        this.y = y
     }
+    move()
+    {
+        console.log('moving')
+    }
+chooseCells(){
+        var foundGrassEater = [];
+        for (var i in this.directions) {
+            var x = this.directions[i][0];
+            var y = this.directions[i][1];
+            if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                if (matrix[y][x] instanceof Grass) {
+                    foundGrassEater.push(this.directions[i]);
+                    this.energy = 15;
+                }   
+            }
+        }
+        if (foundGrassEater.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][1];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof Empty) {
+                        foundGrassEater.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        if (foundGrassEater.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][1];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof GrassEater) {
+                        foundGrassEater.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        var target = random(foundGrassEater);
+        return target;
+    }
+}
 
-    document.getElementById('timer').innerText="timer: " +timer
+
+   
+
+
