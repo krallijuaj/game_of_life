@@ -23,8 +23,13 @@ function setup(){
                 arr.push(new GrassEater(j,i,15))
             } 
              if(entity < 0.01){
-                console.log('pushing ')
                 arr.push(new Flower(j,i))
+            }
+            if(entity < 0.03){
+                arr.push(new FlowerEater(j,i))
+            }
+            if(entity < 0.05){
+                arr.push(new White(j,i))
             }
         }
         matrix.push(arr)
@@ -51,6 +56,15 @@ function draw(){
                
                 grassItems++
             }
+            if(matrix[i][j] instanceof FlowerEater){
+               
+                grassItems++
+            }
+            if(matrix[i][j] instanceof White){
+               
+                grassEaterItems++
+            }
+          
         }
     }
     if(timer== 10){
@@ -74,9 +88,8 @@ function draw(){
                     console.log(weather)
                     }
                     
-                    if(weather="spring"){
-                        fill("red")
-                        }
+        
+                  
     document.getElementById('empty').innerText = "Empty Cells: " + emptyItems
     document.getElementById('grass').innerText = "Grass Cells: " + grassItems
     document.getElementById('grassEater').innerText = "GrassEater Cells: " + grassEaterItems
@@ -93,13 +106,45 @@ function draw(){
                 emptyCells.push(matrix[j][i].chooseCells())
                 emptyCells = emptyCells.filter(e => e != null); // Removes unindentified values(happens when green cells don't have empty cells surrounding it)
             }else if(matrix[j][i] instanceof GrassEater){
-                fill('yellow')
-                matrix[j][i].move()
+                if(weather == 'summer'){
+                    matrix[j][i] = new Empty(i,j)
+                    fill('gray')
+                } else {
+                    fill('yellow')
+                    matrix[j][i].move()
+                }
+                
             }
         else if(matrix[j][i] instanceof Flower){
-            fill('red')
+           
+            if(weather == 'winter'){
+                matrix[j][i] = new Empty(i,j)
+                fill('gray')
+            } else {
+                fill('red')
             matrix[j][i].move()
+            } 
         }
+        else if(matrix[j][i] instanceof FlowerEater){
+            if(weather == 'fall'){
+                matrix[j][i] = new Empty(i,j)
+                fill('gray')
+            } else {
+                fill('blue')
+                matrix[j][i].move()
+            }
+        }
+        else if(matrix[j][i] instanceof White){
+           
+            if(weather == 'spring'){
+                matrix[j][i] = new Empty(i,j)
+                fill('gray')
+            } else {
+                fill('white')
+            matrix[j][i].move()
+            } 
+        }
+        
   
             rect(j*side,i*side,side,side)
         }
@@ -240,16 +285,23 @@ class Empty {
     }
 }
 
-class Flower{
-    constructor(x,y){
-        this.x = x
-        this.y = y
+
+class Flower  extends Item{
+    constructor(x,y,energy){
+       super(x,y)
+        this.energy = energy;
+        this.directions = [
+            [this.x - 1, this.y - 1],
+            [this.x    , this.y - 1],
+            [this.x + 1, this.y - 1],
+            [this.x - 1, this.y    ],
+            [this.x + 1, this.y    ],
+            [this.x - 1, this.y + 1],
+            [this.x    , this.y + 1],
+            [this.x + 1, this.y + 1]
+        ];
     }
-    move()
-    {
-        console.log('moving')
-    }
-chooseCells(){
+    chooseCells(){
         var foundGrassEater = [];
         for (var i in this.directions) {
             var x = this.directions[i][0];
@@ -277,7 +329,7 @@ chooseCells(){
         if (foundGrassEater.length == 0) {
             for (var i in this.directions) {
                 var x = this.directions[i][0];
-                var y = this.directions[i][1];
+                var y = this.directions[i][0];
                 if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
                     if (matrix[y][x] instanceof GrassEater) {
                         foundGrassEater.push(this.directions[i]);
@@ -290,9 +342,171 @@ chooseCells(){
         var target = random(foundGrassEater);
         return target;
     }
+    move(){
+        var targetCell = this.chooseCells()
+        var x = targetCell[1]
+        var y = targetCell[0]
+        var targetCellClone = this.chooseCells()
+        var xClone = targetCellClone[0]
+        var yClone = targetCellClone[1]
+        matrix[this.y][this.x] = new Empty(this.x,this.y)
+        if(this.energy > 0){
+            matrix[y][x] = new Flower(x,y,this.energy)
+            if(Math.random()<0.05){  
+                matrix[yClone][xClone] = new Flower(xClone,yClone,this.energy)
+            }
+        }
+    }
 }
 
 
-   
+class FlowerEater  extends Item{
+    constructor(x,y,energy){
+       super(x,y)
+        this.energy = energy;
+        this.directions = [
+            [this.x - 1, this.y - 1],
+            [this.x    , this.y - 1],
+            [this.x + 1, this.y - 1],
+            [this.x - 1, this.y    ],
+            [this.x + 1, this.y    ],
+            [this.x - 1, this.y + 1],
+            [this.x    , this.y + 1],
+            [this.x + 1, this.y + 1]
+        ];
+    }
+    chooseCells(){
+        var foundFlower = [];
+        for (var i in this.directions) {
+            var x = this.directions[i][0];
+            var y = this.directions[i][1];
+            if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                if (matrix[y][x] instanceof Grass) {
+                    foundFlower.push(this.directions[i]);
+                    this.energy = 15;
+                }   
+            }
+        }
+        if (foundFlower.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][1];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof Empty) {
+                        foundFlower.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        if (foundFlower.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][0];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof Flowerr) {
+                        foundFlower.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        var target = random(foundFlower);
+        return target;
+    }
+    move(){
+        var targetCell = this.chooseCells()
+        var x = targetCell[1]
+        var y = targetCell[0]
+        var targetCellClone = this.chooseCells()
+        var xClone = targetCellClone[0]
+        var yClone = targetCellClone[1]
+        matrix[this.y][this.x] = new Empty(this.x,this.y)
+        if(this.energy > 0){
+            matrix[y][x] = new FlowerEater(x,y,this.energy)
+            if(Math.random()<0.05){  
+                matrix[yClone][xClone] = new FlowerEater(xClone,yClone,this.energy)
+            }
+        }
+    }
+}
+
+
+
+class White  extends Item{
+    constructor(x,y,energy){
+       super(x,y)
+        this.energy = energy;
+        this.directions = [
+            [this.x - 1, this.y - 1],
+            [this.x    , this.y - 1],
+            [this.x + 1, this.y - 1],
+            [this.x - 1, this.y    ],
+            [this.x + 1, this.y    ],
+            [this.x - 1, this.y + 1],
+            [this.x    , this.y + 1],
+            [this.x + 1, this.y + 1]
+        ];
+    }
+    chooseCells(){
+        var foundGrass = [];
+        for (var i in this.directions) {
+            var x = this.directions[i][0];
+            var y = this.directions[i][1];
+            if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                if (matrix[y][x] instanceof Grass) {
+                    foundGrass.push(this.directions[i]);
+                    this.energy = 15;
+                }   
+            }
+        }
+        if (foundGrass.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][1];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof Empty) {
+                        foundGrass.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        if (foundGrass.length == 0) {
+            for (var i in this.directions) {
+                var x = this.directions[i][0];
+                var y = this.directions[i][1];
+                if (x >= 0 && x < matrix[0].length && y >= 0 && y < matrix.length){
+                    if (matrix[y][x] instanceof GrassEater) {
+                        foundGrass.push(this.directions[i]);
+                    }
+                    
+                }  
+            }
+            this.energy--
+        }
+        var target = random(foundGrass);
+        return target;
+    }
+    move(){
+        var targetCell = this.chooseCells()
+        var x = targetCell[0]
+        var y = targetCell[1]
+        var targetCellClone = this.chooseCells()
+        var xClone = targetCellClone[0]
+        var yClone = targetCellClone[1]
+        matrix[this.y][this.x] = new Empty(this.x,this.y)
+        if(this.energy > 0){
+            matrix[y][x] = new White(x,y,this.energy)
+            if(Math.random()<0.05){  
+                matrix[yClone][xClone] = new White(xClone,yClone,this.energy)
+            }
+        }
+    }
+}
+
 
 
